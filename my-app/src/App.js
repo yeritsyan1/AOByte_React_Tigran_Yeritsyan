@@ -13,6 +13,7 @@ export default class App extends Component {
     this.state = {
       firstList: [],
       secondList: [],
+      isSorted: { firstList: false, secondList: false },
       posts: [
         {
           title: "Post 1",
@@ -145,7 +146,9 @@ export default class App extends Component {
     // update column list
     this.setState(() => {
       return {
-        [listname]: [...this.state[listname], newItem],
+        [listname]: this.state.isSorted[listname]
+          ? [newItem, ...this.state[listname]]
+          : [...this.state[listname], newItem],
       };
     });
 
@@ -171,6 +174,10 @@ export default class App extends Component {
     this.setState(() => {
       return {
         [listname]: [...this.state[listname]].reverse(),
+        isSorted: {
+          ...this.state.isSorted,
+          [listname]: !this.state.isSorted[listname],
+        },
       };
     });
   }
