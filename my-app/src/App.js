@@ -135,7 +135,7 @@ export default class App extends Component {
   }
 
   addItem(listname) {
-    let newItem = this.state.posts.reduce((aggr, val) => {
+    const newItem = this.state.posts.reduce((aggr, val) => {
       return val.isSelected
         ? aggr
         : val.averageRate > aggr.averageRate
@@ -144,6 +144,8 @@ export default class App extends Component {
     });
 
     // update column list
+  const itemExist = this.state.firstList.some((obj) => obj.id === newItem.id) || this.state.secondList.some((obj) => obj.id === newItem.id)
+ if(!itemExist) {
     this.setState(() => {
       return {
         [listname]: this.state.isSorted[listname]
@@ -151,7 +153,7 @@ export default class App extends Component {
           : [...this.state[listname], newItem],
       };
     });
-
+  }
     // change isSelected value
     this.setState(() => {
       return {
