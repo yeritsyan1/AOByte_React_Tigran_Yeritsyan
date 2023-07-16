@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Column1 from "./Column1";
-import Column2 from "./Column2";
+import Column from "./Column";
 import { v4 as uuid } from "uuid";
 
 export default class List extends Component {
@@ -46,11 +46,11 @@ export default class List extends Component {
               rate: 17,
             },
             {
-              comment: "comment 2",
+              comment: "comment 222",
               rate: 5,
             },
             {
-              comment: "comment 3",
+              comment: "comment 359",
               rate: 4,
             },
           ],
@@ -82,11 +82,11 @@ export default class List extends Component {
           id: uuid(),
           comments: [
             {
-              comment: "comment 1",
+              comment: "comment 111",
               rate: 7,
             },
             {
-              comment: "comment 2",
+              comment: "comment 25",
               rate: 6,
             },
             {
@@ -106,11 +106,11 @@ export default class List extends Component {
               rate: 5,
             },
             {
-              comment: "comment 2",
+              comment: "comment 897",
               rate: 5,
             },
             {
-              comment: "comment 3",
+              comment: "comment 398",
               rate: 17,
             },
           ],
@@ -236,7 +236,9 @@ export default class List extends Component {
             }),
           };
         }),
-        () => this.sortList(listname)
+        () => {
+          return this.sortList(listname), this.sortList(listname);
+        }
       );
     }
   }
@@ -244,19 +246,23 @@ export default class List extends Component {
   render() {
     return (
       <div style={{ display: "flex" }}>
-        <Column1
+        <Column
           addItem={this.addItem}
-          firstList={this.state.firstList}
+          column={this.state.firstList}
           sortList={this.sortList}
           onDelete={this.onDelete}
           onRemove={this.onRemove}
+          listname="firstList"
+          backgroundColor="green"
         />
-        <Column2
+        <Column
           addItem={this.addItem}
-          secondList={this.state.secondList}
+          column={this.state.secondList}
           sortList={this.sortList}
           onDelete={this.onDelete}
           onRemove={this.onRemove}
+          listname="secondList"
+          backgroundColor="blue"
         />
       </div>
     );

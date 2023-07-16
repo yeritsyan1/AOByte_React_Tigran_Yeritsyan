@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+/* import React, { Component } from "react";
 import { v4 as uuid } from "uuid";
 
 export default class Column1 extends Component {
@@ -45,3 +45,4 @@ export default class Column1 extends Component {
     );
   }
 }
+ */
