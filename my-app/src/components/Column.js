@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { v4 as uuid } from "uuid";
-import Comments from "./Comments";
-
+import { Button } from "@mui/material";
+import Post from "./Post";
 export default class Column extends Component {
   constructor(props) {
     super(props);
@@ -10,6 +10,7 @@ export default class Column extends Component {
       text: "",
       list: this.props.listname,
       commentList: [],
+      comment: "",
     };
   }
 
@@ -48,24 +49,11 @@ export default class Column extends Component {
 
     // all posts
     else {
-      return (
-        this.setState(() => {
-          return {
-            filteredArray: this.props.column.filter((parent) => {
-              return parent.comments.some((parentChild) =>
-                this.state.commentList.some(
-                  (child) => child.comment === parentChild.comment
-                )
-              );
-            }),
-          };
-        }),
-        this.setState(() => {
-          return {
-            filteredArray: this.props.column,
-          };
-        })
-      );
+      return this.setState(() => {
+        return {
+          filteredArray: this.props.column,
+        };
+      });
     }
   };
 
@@ -78,7 +66,6 @@ export default class Column extends Component {
           alignSelf: "start",
         }}
       >
-        <h1> Column </h1>
         <div>
           <input
             style={{
@@ -122,83 +109,53 @@ export default class Column extends Component {
             <option value="comments"> comments </option>
             <option value="posts"> posts </option>
           </select>
-          <button
-            style={{
-              width: "100px",
-              height: "35px",
-              border: "1px black solid",
-              borderRadius: "15px",
-              backgroundColor: "white",
-              fontSize: "16px",
-              cursor: "pointer",
-            }}
+          <Button
+            variant="contained"
             onClick={() => {
               this.onFilter(this.state.list);
             }}
           >
             Filter
-          </button>
+          </Button>
         </div>
         <div style={{ display: "flex", gap: "10px", paddingTop: "15px" }}>
-          <button
+          <Button
+            variant="contained"
             onClick={() => this.props.sortList(this.props.listname)}
             style={{
-              width: "100px",
-              height: "35px",
-              border: "1px black solid",
-              borderRadius: "15px",
               backgroundColor: "grey",
-              fontSize: "16px",
-              cursor: "pointer",
             }}
           >
             Sort
-          </button>
-          <button
+          </Button>
+          <Button
+            disabled={this.props.loaded}
+            variant="contained"
+            color="success"
             onClick={() => {
               this.state.list === this.props.listname &&
                 this.props.addItem(this.props.listname);
               this.onFilter(this.state.list);
             }}
-            style={{
-              width: "100px",
-              height: "35px",
-              border: "1px black solid",
-              borderRadius: "15px",
-              backgroundColor: "green",
-              color: "white",
-              fontSize: "16px",
-              cursor: "pointer",
-            }}
           >
             Add
-          </button>
+          </Button>
           {this.state.list === this.props.listname && (
-            <button
+            <Button
+              disabled={this.props.loaded}
+              variant="contained"
+              color="error"
               onClick={() =>
                 this.props.onRemove(
                   this.props.listname,
                   this.onFilter(this.state.list)
                 )
               }
-              style={{
-                width: "100px",
-                height: "35px",
-                border: "1px black solid",
-                borderRadius: "15px",
-                backgroundColor: "red",
-                color: "white",
-                fontSize: "16px",
-                cursor: "pointer",
-              }}
             >
               Remove
-            </button>
+            </Button>
           )}
         </div>
-        <h1 style={{ color: "yellow" }}>
-          All posts: {this.props.column.length}
-        </h1>
 
         {this.state.filteredArray.map((item) => {
           return (
@@ -212,42 +169,11 @@ export default class Column extends Component {
                 paddingRight: "10px",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <h4 style={{ color: "white", textAlign: "right" }}>
-                  Rate: {item?.averageRate}
-                </h4>
-                <button
-                  style={{
-                    fontSize: "12px",
-                    backgroundColor: "red",
-                    color: "white",
-                  }}
-                  onClick={() => this.props.onDelete(this.props.listname, item)}
-                >
-                  Delete
-                </button>
-              </div>
-              <p
-                style={{
-                  textAlign: "left",
-                  backgroundColor: "white",
-                  padding: "0 15px",
-                }}
-              >
-                {item.title}
-              </p>
-              <h3
-                style={{ color: "red", textAlign: "left", padding: "0px 10px" }}
-              >
-                Comments:
-              </h3>
-              {item.comments.map((comments) => {
-                return (
-                  <React.Fragment key={uuid()}>
-                    <Comments comments={comments} />
-                  </React.Fragment>
-                );
-              })}
+              <Post
+                item={item}
+                onDelete={this.props.onDelete}
+                listname={this.props.listname}
+              />
             </div>
           );
         })}

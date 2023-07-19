@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import Column1 from "./Column1";
 import Column from "./Column";
-import { v4 as uuid } from "uuid";
+import { collection, getFirestore, getDocs } from "firebase/firestore";
+import { app } from "../firebase/firebase";
 
 export default class List extends Component {
   constructor(props) {
@@ -11,115 +11,40 @@ export default class List extends Component {
     this.onDelete = this.onDelete.bind(this);
     this.onRemove = this.onRemove.bind(this);
     this.state = {
+      db: getFirestore(app),
       firstList: [],
       secondList: [],
       isSorted: { firstList: false, secondList: false },
-      posts: [
-        {
-          title: "Post 1",
-          isSelected: false,
-          averageRate: 0,
-          id: uuid(),
-          comments: [
-            {
-              comment: "comment 1",
-              rate: 7,
-            },
-            {
-              comment: "comment 2",
-              rate: 8,
-            },
-            {
-              comment: "comment 3",
-              rate: 4,
-            },
-          ],
-        },
-        {
-          title: "Post 2",
-          isSelected: false,
-          averageRate: 0,
-          id: uuid(),
-          comments: [
-            {
-              comment: "comment 1",
-              rate: 17,
-            },
-            {
-              comment: "comment 222",
-              rate: 5,
-            },
-            {
-              comment: "comment 359",
-              rate: 4,
-            },
-          ],
-        },
-        {
-          title: "Post 3",
-          isSelected: false,
-          averageRate: 0,
-          id: uuid(),
-          comments: [
-            {
-              comment: "comment 1",
-              rate: 5,
-            },
-            {
-              comment: "comment 2",
-              rate: 7,
-            },
-            {
-              comment: "comment 3",
-              rate: 9,
-            },
-          ],
-        },
-        {
-          title: "Post 4",
-          isSelected: false,
-          averageRate: 0,
-          id: uuid(),
-          comments: [
-            {
-              comment: "comment 111",
-              rate: 7,
-            },
-            {
-              comment: "comment 25",
-              rate: 6,
-            },
-            {
-              comment: "comment 3",
-              rate: 23,
-            },
-          ],
-        },
-        {
-          title: "Post 5",
-          isSelected: false,
-          averageRate: 0,
-          id: uuid(),
-          comments: [
-            {
-              comment: "comment 1",
-              rate: 5,
-            },
-            {
-              comment: "comment 897",
-              rate: 5,
-            },
-            {
-              comment: "comment 398",
-              rate: 17,
-            },
-          ],
-        },
-      ],
+      posts: [],
+      loaded: true,
     };
   }
 
   componentDidMount() {
+    (async () => {
+      const colRef = collection(this.state.db, "posts");
+      const snapshots = await getDocs(colRef);
+
+      const docs = await snapshots.docs.map((doc) => {
+        const data = doc.data();
+        data.id = doc.id;
+        data.isSelected = false;
+        data.averageRate = Math.random() * 100;
+        return data;
+      });
+      await this.setState(() => {
+        return {
+          posts: docs,
+        };
+      });
+    })().then(() =>
+      this.setState(() => {
+        return {
+          loaded: false,
+        };
+      })
+    );
+
     this.setState(() => {
       return {
         posts: this.state.posts.map((item) => {
@@ -253,7 +178,7 @@ export default class List extends Component {
           onDelete={this.onDelete}
           onRemove={this.onRemove}
           listname="firstList"
-          backgroundColor="green"
+          loaded={this.state.loaded}
         />
         <Column
           addItem={this.addItem}
@@ -262,7 +187,7 @@ export default class List extends Component {
           onDelete={this.onDelete}
           onRemove={this.onRemove}
           listname="secondList"
-          backgroundColor="blue"
+          loaded={this.state.loaded}
         />
       </div>
     );
