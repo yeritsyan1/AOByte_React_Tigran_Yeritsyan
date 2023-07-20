@@ -168,6 +168,21 @@ export default class List extends Component {
     }
   }
 
+  sortComments = (listname, elem) => {
+    this.setState(() => {
+      return {
+        [listname]: this.state[listname].map((item) => {
+          if (item.id === elem.id) {
+            const sorted = elem?.comments?.sort((a, b) => b.rate - a.rate);
+            return { ...elem, sorted };
+          } else {
+            return item;
+          }
+        }),
+      };
+    });
+  };
+
   render() {
     return (
       <div style={{ display: "flex" }}>
@@ -179,6 +194,7 @@ export default class List extends Component {
           onRemove={this.onRemove}
           listname="firstList"
           loaded={this.state.loaded}
+          sortComments={this.sortComments}
         />
         <Column
           addItem={this.addItem}
@@ -188,6 +204,7 @@ export default class List extends Component {
           onRemove={this.onRemove}
           listname="secondList"
           loaded={this.state.loaded}
+          sortComments={this.sortComments}
         />
       </div>
     );

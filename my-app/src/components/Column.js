@@ -20,7 +20,7 @@ export default class Column extends Component {
       return this.setState(() => {
         return {
           filteredArray: this.props.column.filter(
-            (post) => post.title === this.state.text
+            (post) => post.title.toLowerCase() === this.state.text.toLowerCase()
           ),
         };
       });
@@ -29,19 +29,12 @@ export default class Column extends Component {
     // comments
     else if (filteredBy === "comments") {
       return this.setState(() => {
-        const commentList = this.props.column
-          .map((item) =>
-            item.comments.find((elem) => elem.comment === this.state.text)
+        const filteredArray = this.props.column.filter((item) =>
+          item.comments.some((elem) =>
+            elem.text.includes(this.state.text.toLowerCase())
           )
-          .filter(Boolean);
-
-        const filteredArray = this.props.column.filter((parent) => {
-          return parent.comments.some((parentChild) =>
-            commentList.some((child) => child.comment === parentChild.comment)
-          );
-        });
+        );
         return {
-          commentList,
           filteredArray,
         };
       });
@@ -84,6 +77,11 @@ export default class Column extends Component {
                   text: e.target.value,
                 };
               });
+            }}
+            onKeyDown={(e) => {
+              if (e.keyCode === 13) {
+                return this.onFilter(this.state.list);
+              }
             }}
           />
           <select
@@ -173,6 +171,7 @@ export default class Column extends Component {
                 item={item}
                 onDelete={this.props.onDelete}
                 listname={this.props.listname}
+                sortComments={this.props.sortComments}
               />
             </div>
           );
