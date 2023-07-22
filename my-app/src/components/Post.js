@@ -6,7 +6,7 @@ import {
   setDoc,
   updateDoc,
 } from "firebase/firestore";
-import React, { Component } from "react";
+import React, { useState } from "react";
 import { app } from "../firebase/firebase";
 import { v4 as uuid } from "uuid";
 import Comments from "./Comments";
@@ -20,27 +20,23 @@ import Typography from "@mui/material/Typography";
 import { red } from "@mui/material/colors";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CardActions from "@mui/material/CardActions";
+import { USER } from "../constants/constants";
 
-export default class Post extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      comment: "",
-      db: getFirestore(app),
-    };
-  }
+const Post = (props) => {
+  const [comment, setComment] = useState("");
+  const db = getFirestore(app);
 
-  rateComment = async (elem) => {
-    await setDoc(doc(this.state.db, "posts", this.props.item.id), {
-      ...this.props.item,
-      comments: this.props.item.comments.map((item) => {
+  const rateComment = async (elem) => {
+    await setDoc(doc(db, "posts", props.item.id), {
+      ...props.item,
+      comments: props.item.comments.map((item) => {
         if (item.id === elem.id) {
           return {
             ...elem,
             rate: item.rate + 1,
             ratedUser: [
               ...elem.ratedUser,
-              JSON.parse(localStorage.getItem("user")).providerData[0].email,
+              JSON.parse(localStorage.getItem(USER)).providerData[0].email,
             ],
           };
         } else {
@@ -50,119 +46,109 @@ export default class Post extends Component {
     });
   };
 
-  render() {
-    return (
-      <Card
-        style={{
-          width: "100%",
-          marginBottom: "10px",
-          backgroundColor: "wheat",
-        }}
-      >
-        <CardHeader
-          avatar={<Avatar sx={{ bgcolor: red[500] }}>R</Avatar>}
-          action={
-            <IconButton aria-label="settings">
-              <MoreVertIcon />
-            </IconButton>
-          }
-          title={this.props.item.title}
-        />
-        <CardMedia component="img" maxheight="194" alt="" />
-        <CardContent>
-          <CardActions>
-            <button
-              style={{
-                fontSize: "12px",
-                backgroundColor: "red",
-                color: "white",
-              }}
-              onClick={() =>
-                this.props.onDelete(this.props.listname, this.props.item)
-              }
-            >
-              Delete
-            </button>
-          </CardActions>
-          <Typography variant="body2" color="text.secondary">
-            {this.props.item.body}
-          </Typography>
-        </CardContent>
-        <CardContent>
-          <TextField
-            placeholder="Comment"
-            multiline
-            rows="2"
-            value={this.state.comment}
-            onChange={(e) => {
-              this.setState(() => {
-                return {
-                  comment: e.target.value,
-                };
-              });
+  return (
+    <Card
+      style={{
+        width: "100%",
+        marginBottom: "10px",
+        backgroundColor: "wheat",
+      }}
+    >
+      <CardHeader
+        avatar={<Avatar sx={{ bgcolor: red[500] }}>R</Avatar>}
+        action={
+          <IconButton aria-label="settings">
+            <MoreVertIcon />
+          </IconButton>
+        }
+        title={props.item.title}
+      />
+      <CardMedia component="img" maxheight="194" alt="" />
+      <CardContent>
+        <CardActions>
+          <button
+            style={{
+              fontSize: "12px",
+              backgroundColor: "red",
+              color: "white",
             }}
-          />
-          <Button
-            variant="contained"
-            disabled={this.state.comment.length < 1}
-            onClick={async () => {
-              const updateComments = doc(
-                this.state.db,
-                "posts",
-                this.props.item.id
-              );
-              await updateDoc(updateComments, {
-                comments: arrayUnion({
-                  commentAuthor: JSON.parse(localStorage.getItem("user"))
-                    .providerData[0].displayName,
-                  text: this.state.comment,
-                  rate: 0,
-                  id: uuid(),
-                  ratedUser: [],
-                }),
-              });
-              await this.setState(() => {
-                return {
-                  comment: "",
-                };
-              });
-            }}
+            onClick={() =>
+              props.onDelete(props.column, props.setUpdateList, props.item)
+            }
           >
-            Send
-          </Button>
-          <Divider />
-        </CardContent>
-        <CardContent>
-          <Box>
-            <h3
-              style={{ color: "red", textAlign: "left", padding: "0px 10px" }}
+            Delete
+          </button>
+        </CardActions>
+        <Typography variant="body2" color="text.secondary">
+          {props.item.body}
+        </Typography>
+      </CardContent>
+      <CardContent>
+        <TextField
+          placeholder="Comment"
+          multiline
+          rows="2"
+          value={comment}
+          onChange={(e) => {
+            setComment(e.target.value);
+          }}
+        />
+        <Button
+          variant="contained"
+          disabled={comment.length < 1}
+          onClick={async () => {
+            const updateComments = doc(db, "posts", props.item.id);
+            await updateDoc(updateComments, {
+              comments: arrayUnion({
+                commentAuthor: JSON.parse(localStorage.getItem(USER))
+                  .providerData[0].displayName,
+                text: comment,
+                rate: 0,
+                id: uuid(),
+                ratedUser: [],
+              }),
+            });
+            await setComment("");
+          }}
+        >
+          Send
+        </Button>
+        <Divider />
+      </CardContent>
+      <CardContent>
+        <Box>
+          <h3 style={{ color: "red", textAlign: "left", padding: "0px 10px" }}>
+            Comments:
+          </h3>
+          <CardActions>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                props.sortComments(
+                  props.column,
+                  props.setUpdateList,
+                  props.item
+                );
+              }}
             >
-              Comments:
-            </h3>
-            <CardActions>
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  this.props.sortComments(this.props.listname, this.props.item);
-                }}
-              >
-                Filter Comments
-              </Button>
-            </CardActions>
-            {this.props.item?.comments.map((comment) => {
-              return (
-                <React.Fragment key={uuid()}>
-                  <Comments
-                    comment={comment}
-                    postID={this.props.item.id}
-                    rateComment={this.rateComment}
-                  />
-                </React.Fragment>
-              );
-            })}
-          </Box>
-        </CardContent>
-      </Card>
-    );
-  }
-}
+              Filter Comments
+            </Button>
+          </CardActions>
+          {props.item?.comments.map((comment) => {
+            return (
+              <React.Fragment key={uuid()}>
+                <Comments
+                  comment={comment}
+                  postID={props.item.id}
+                  rateComment={rateComment}
+                />
+              </React.Fragment>
+            );
+          })}
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default Post;
