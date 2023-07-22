@@ -1,28 +1,19 @@
-import React, { Component } from "react";
+import React, { useEffect, useState } from "react";
 import Column from "./Column";
 import { collection, getFirestore, getDocs } from "firebase/firestore";
 import { app } from "../firebase/firebase";
 
-export default class List extends Component {
-  constructor(props) {
-    super(props);
-    this.addItem = this.addItem.bind(this);
-    this.sortList = this.sortList.bind(this);
-    this.onDelete = this.onDelete.bind(this);
-    this.onRemove = this.onRemove.bind(this);
-    this.state = {
-      db: getFirestore(app),
-      firstList: [],
-      secondList: [],
-      isSorted: { firstList: false, secondList: false },
-      posts: [],
-      loaded: true,
-    };
-  }
+const List = () =>  {
+  const [firstList, setFirstList] = useState([])
+  const [secondList, setSecondList] = useState([])
+  const [isSorted, setIsSorted] = useState({ firstList: false, secondList: false })
+  const [posts, setPosts] = useState([])
+  const [loaded, setLoaded] = useState(true)
+  const db = getFirestore(app)
 
-  componentDidMount() {
+  useEffect(() => {
     (async () => {
-      const colRef = collection(this.state.db, "posts");
+      const colRef = collection(db, "posts");
       const snapshots = await getDocs(colRef);
 
       const docs = await snapshots.docs.map((doc) => {
@@ -32,35 +23,25 @@ export default class List extends Component {
         data.averageRate = Math.random() * 100;
         return data;
       });
-      await this.setState(() => {
-        return {
-          posts: docs,
-        };
-      });
+      await setPosts(docs);
     })().then(() =>
-      this.setState(() => {
-        return {
-          loaded: false,
-        };
-      })
+      setLoaded(false)
     );
 
-    this.setState(() => {
-      return {
-        posts: this.state.posts.map((item) => {
-          return (
-            (item.averageRate = item.comments.reduce(function (aggr, val) {
-              return aggr + val.rate;
-            }, 0)),
-            item
-          );
-        }),
-      };
+    setPosts(() => {
+      return  posts.map((item) => {
+        return (
+          (item.averageRate = item.comments.reduce(function (aggr, val) {
+            return aggr + val.rate;
+          }, 0)),
+          item
+        );
+      })
     });
-  }
+  }, [])
 
-  addItem(listname) {
-    const newItem = this.state.posts.reduce((aggr, val) => {
+  const addItem = (listname, setList) => {
+    const newItem = posts.reduce((aggr, val) => {
       return val.isSelected
         ? aggr
         : val.averageRate > aggr.averageRate
@@ -70,143 +51,142 @@ export default class List extends Component {
 
     // update column list
     const itemExist =
-      this.state.firstList.some((obj) => obj.id === newItem.id) ||
-      this.state.secondList.some((obj) => obj.id === newItem.id);
-    if (!itemExist) {
-      this.setState(() => {
-        return {
-          [listname]: this.state.isSorted[listname]
-            ? [newItem, ...this.state[listname]]
-            : [...this.state[listname], newItem],
-        };
-      });
-    }
+      firstList.some((obj) => obj.id === newItem.id) ||
+      secondList.some((obj) => obj.id === newItem.id);
+      if (!itemExist) {
+        setList(() => {
+          return isSorted[listname]
+          ? [newItem, ...listname]
+          : [...listname, newItem]
+        });
+      }
+  
     // change isSelected value
-    this.setState(() => {
-      return {
-        posts: this.state.posts.map((item) => {
-          if (item.id === newItem.id) {
-            return {
-              ...item,
-              isSelected: true,
-            };
-          } else {
-            return item;
-          }
-        }),
-      };
+    setPosts(() => {
+      return posts.map((item) => {
+        if (item.id === newItem.id) {
+          return {
+            ...item,
+            isSelected: true,
+          };
+        } else {
+          return item;
+        }
+      })
     });
   }
 
   // sorted by value
-  sortList(listname) {
-    this.setState(() => {
-      return {
-        [listname]: this.state[listname].sort((a, b) =>
-          this.state.isSorted[listname]
+   const sortList = (listname, setList) => {
+    setIsSorted( {
+      ...isSorted,
+      [listname]: !isSorted[listname],
+    })
+    setList(() => {
+      return listname.sort((a, b) =>
+          isSorted[listname]
             ? b.averageRate - a.averageRate
             : a.averageRate - b.averageRate
-        ),
-        isSorted: {
-          ...this.state.isSorted,
-          [listname]: !this.state.isSorted[listname],
-        },
-      };
+    )
     });
   }
 
   // delete me
-  onDelete(listname, item) {
-    this.setState(() => {
-      return {
-        [listname]: this.state[listname].filter((elem) => elem.id !== item.id),
-        posts: this.state.posts.map((elem) => {
-          if (elem.id === item.id) {
-            return {
-              ...item,
-              isSelected: false,
-            };
-          } else {
-            return elem;
-          }
-        }),
-      };
+  const onDelete = (listname, setList, item) => {
+    setList(() => {
+      return listname.filter((elem) => elem.id !== item.id)
     });
+
+    setPosts(() => {
+     return posts.map((elem) => {
+        if (elem.id === item.id) {
+          return {
+            ...item,
+            isSelected: false,
+          };
+        } else {
+          return elem;
+        }
+      })
+    })
   }
   // remove item
-  onRemove(listname) {
-    if (this.state[listname].length) {
+    const onRemove = (listname, setList) => {
+    if (listname.length) {
       let deletedObj = { averageRate: 0 };
-      for (const item in this.state[listname]) {
+      for (const item in listname) {
         deletedObj =
-          this.state[listname][item].averageRate > deletedObj.averageRate
-            ? this.state[listname][item]
+          listname[item].averageRate > deletedObj.averageRate
+            ? listname[item]
             : deletedObj;
       }
+     
       return (
-        this.setState(() => {
-          return {
-            [listname]: this.state[listname].filter(
-              (obj) => obj !== deletedObj
-            ),
-            posts: this.state.posts.map((item) => {
-              if (item.id === deletedObj.id) {
-                return {
-                  ...item,
-                  isSelected: false,
-                };
-              } else {
-                return item;
-              }
-            }),
-          };
+        setList(() => {
+          return listname.filter(
+            (obj) => obj !== deletedObj
+          );
         }),
-        () => {
-          return this.sortList(listname), this.sortList(listname);
-        }
+        /* () => {
+          return sortList(listname), sortList(listname);
+        } */
+        setPosts(() => {
+          return posts.map((item) => {
+             if (item.id === deletedObj.id) {
+               return {
+                 ...item,
+                 isSelected: false,
+               };
+             } else {
+               return item;
+             }
+           })
+         })
       );
     }
   }
 
-  sortComments = (listname, elem) => {
-    this.setState(() => {
-      return {
-        [listname]: this.state[listname].map((item) => {
-          if (item.id === elem.id) {
-            const sorted = elem?.comments?.sort((a, b) => b.rate - a.rate);
-            return { ...elem, sorted };
-          } else {
-            return item;
-          }
-        }),
-      };
+  const sortComments = (listname, setList, elem) => {
+    setList(() => {
+      return listname.map((item) => {
+        if (item.id === elem.id) {
+          const sorted = elem?.comments?.sort((a, b) => b.rate - a.rate);
+          return { ...elem, sorted };
+        } else {
+          return item;
+        }
+      })
     });
   };
 
-  render() {
+
     return (
       <div style={{ display: "flex" }}>
         <Column
-          addItem={this.addItem}
-          column={this.state.firstList}
-          sortList={this.sortList}
-          onDelete={this.onDelete}
-          onRemove={this.onRemove}
+          addItem={addItem}
+          column={firstList}
+          sortList={sortList}
+          onDelete={onDelete}
+          onRemove={onRemove}
           listname="firstList"
-          loaded={this.state.loaded}
-          sortComments={this.sortComments}
+          setUpdateList={setFirstList}
+          loaded={loaded}
+          sortComments={sortComments}
         />
         <Column
-          addItem={this.addItem}
-          column={this.state.secondList}
-          sortList={this.sortList}
-          onDelete={this.onDelete}
-          onRemove={this.onRemove}
+          addItem={addItem}
+          column={secondList}
+          sortList={sortList}
+          onDelete={onDelete}
+          onRemove={onRemove}
+         // listname="secondList"
           listname="secondList"
-          loaded={this.state.loaded}
-          sortComments={this.sortComments}
+          setUpdateList={setSecondList}
+          loaded={loaded}
+          sortComments={sortComments}
         />
       </div>
     );
-  }
 }
+
+export default List

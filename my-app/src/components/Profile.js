@@ -1,34 +1,28 @@
-import React, { Component } from "react";
+import React from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { Button } from "@mui/material";
-import { app } from "../firebase/firebase";
+import { USER } from "../constants/constants";
 
-export default class Profile extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      auth: getAuth(app),
-    };
-  }
+const Profile = () => {
+  const auth = getAuth();
 
-  render() {
-    return (
-      <div>
-        <Button
-          onClick={() => {
-            const auth = getAuth();
-            signOut(auth)
-              .then(() => {
-                localStorage.removeItem("user");
-              })
-              .catch((error) => {
-                console.log("err", error);
-              });
-          }}
-        >
-          Log Out
-        </Button>
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <Button
+        onClick={() => {
+          signOut(auth)
+            .then(() => {
+              localStorage.removeItem(USER);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }}
+      >
+        Log Out
+      </Button>
+    </div>
+  );
+};
+
+export default Profile;
