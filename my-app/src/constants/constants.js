@@ -1,3 +1,7 @@
+import Avatar from "@mui/material/Avatar";
+import PostAddIcon from "@mui/icons-material/PostAdd";
+import Logout from "@mui/icons-material/Logout";
+import Divider from "@mui/material/Divider";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -9,13 +13,15 @@ export const signUp = (
   password,
   setUsername,
   setEmail,
-  setPassword
+  setPassword,
+  navigate
 ) => {
   return createUserWithEmailAndPassword(auth, email, password)
     .then(() => {
       setUsername("");
       setEmail("");
       setPassword("");
+      navigate(SIGNIN);
     })
     .catch((error) => {
       const errorCode = error.code;
@@ -24,15 +30,39 @@ export const signUp = (
     });
 };
 
-export const signIn = (auth, email, password, setEmail, setPassword) => {
+export const signIn = (
+  auth,
+  email,
+  password,
+  setEmail,
+  setPassword,
+  navigate
+) => {
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
       setEmail("");
       setPassword("");
+      navigate("/");
     })
-    .catch(() => {
-  
-    });
+    .catch(() => {});
 };
 
 export const USER = "user";
+export const SIGNUP = "signup";
+export const SIGNIN = "signin";
+export const CREATEPOST = "createpost";
+export const PROFILE = "profile";
+export const list = [
+  { name: "Profile", icon: <Avatar />, url: PROFILE },
+  {
+    name: "Create post",
+    icon: <PostAddIcon />,
+    url: CREATEPOST,
+    divider: <Divider />,
+  },
+  {
+    name: "Logout",
+    icon: <Logout fontSize="small" />,
+    url: SIGNIN,
+  },
+];

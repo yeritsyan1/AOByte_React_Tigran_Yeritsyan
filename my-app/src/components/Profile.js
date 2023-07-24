@@ -1,10 +1,12 @@
 import React from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { Button } from "@mui/material";
-import { USER } from "../constants/constants";
+import { SIGNIN, USER } from "../constants/constants";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const auth = getAuth();
+  const navigate = useNavigate();
 
   return (
     <div>
@@ -14,6 +16,7 @@ const Profile = () => {
             .then(() => {
               localStorage.removeItem(USER);
             })
+            .then(() => navigate(`/${SIGNIN}`))
             .catch((error) => {
               console.log(error);
             });

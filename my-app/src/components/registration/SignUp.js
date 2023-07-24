@@ -3,12 +3,14 @@ import TextField from "@mui/material/TextField";
 import { Box, Button } from "@mui/material";
 import { signUp } from "../../constants/constants";
 import { getAuth } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const auth = getAuth();
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -58,7 +60,8 @@ const SignUp = () => {
             password,
             setUsername,
             setEmail,
-            setPassword
+            setPassword,
+            navigate
           );
         }}
       >
