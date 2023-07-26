@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
-import { Box, Button } from "@mui/material";
-import { signUp } from "../../constants/constants";
+import { Button } from "@mui/material";
+import { SIGNIN, signUp } from "../../constants/constants";
 import { getAuth } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -13,61 +18,61 @@ const SignUp = () => {
   const navigate = useNavigate();
 
   return (
-    <Box
-      sx={{
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 1,
-        backgroundColor: "grey",
-        border: "1px black solid",
-      }}
-    >
-      <h2> SignUp </h2>
-      <TextField
-        placeholder="Username"
-        value={username}
-        onChange={(e) => {
-          setUsername(e.target.value);
-        }}
-      />
-      <TextField
-        placeholder="email"
-        value={email}
-        onChange={(e) => {
-          setEmail(e.target.value);
-        }}
-      />
-      <TextField
-        placeholder="Password"
-        type="password"
-        value={password}
-        onChange={(e) => {
-          setPassword(e.target.value);
-        }}
-      />
-      <Button
-        variant="contained"
-        disabled={
-          email.length < 6 || password.length < 6 || username.length < 3
-        }
-        onClick={async () => {
-          await signUp(
-            auth,
-            email,
-            password,
-            setUsername,
-            setEmail,
-            setPassword,
-            navigate
-          );
-        }}
-      >
-        Sign Up
-      </Button>
-    </Box>
+    <Dialog open={true} fullWidth sx={{ textAlign: "center" }}>
+      <DialogTitle>Sign Up</DialogTitle>
+      <DialogContent>
+        <TextField
+          placeholder="Username"
+          value={username}
+          onChange={(e) => {
+            setUsername(e.target.value);
+          }}
+        />
+      </DialogContent>
+      <DialogContent>
+        <TextField
+          placeholder="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+          }}
+        />
+      </DialogContent>
+      <DialogContent>
+        <TextField
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+          }}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button
+          variant="contained"
+          disabled={
+            email.length < 6 || password.length < 6 || username.length < 3
+          }
+          onClick={async () => {
+            await signUp(
+              auth,
+              email,
+              password,
+              setUsername,
+              setEmail,
+              setPassword,
+              navigate
+            );
+          }}
+        >
+          Sign Up
+        </Button>
+      </DialogActions>
+      <DialogActions>
+        <Link to={`/${SIGNIN}`}> Sign In </Link>
+      </DialogActions>
+    </Dialog>
   );
 };
 

@@ -1,8 +1,9 @@
 import React from "react";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { Button } from "@mui/material";
-import { SIGNIN, USER } from "../constants/constants";
+import { signOut } from "../constants/constants";
 import { useNavigate } from "react-router-dom";
+import AccountMenu from "./AccountNavigation";
 
 const Profile = () => {
   const auth = getAuth();
@@ -10,16 +11,10 @@ const Profile = () => {
 
   return (
     <div>
+      <AccountMenu />
       <Button
         onClick={() => {
-          signOut(auth)
-            .then(() => {
-              localStorage.removeItem(USER);
-            })
-            .then(() => navigate(`/${SIGNIN}`))
-            .catch((error) => {
-              console.log(error);
-            });
+          signOut(auth, navigate);
         }}
       >
         Log Out
