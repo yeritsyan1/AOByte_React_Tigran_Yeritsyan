@@ -3,12 +3,10 @@ import { useState } from "react";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import { v4 as uuid } from "uuid";
 import { list } from "../constants/constants";
-import { Link } from "react-router-dom";
 
 export default function AccountMenu() {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -16,9 +14,11 @@ export default function AccountMenu() {
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
+
   return (
     <React.Fragment>
       <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
@@ -39,7 +39,9 @@ export default function AccountMenu() {
         anchorEl={anchorEl}
         id="account-menu"
         open={open}
-        onClose={handleClose}
+        onClose={() => {
+          handleClose();
+        }}
         onClick={handleClose}
         PaperProps={{
           elevation: 0,
@@ -72,12 +74,18 @@ export default function AccountMenu() {
       >
         {list.map((item) => {
           return (
-            <Link to={item.url} key={uuid()}>
-              <MenuItem onClick={handleClose}>
+            <Box
+              key={uuid()}
+              sx={{ textAlign: "center", padding: "10px 20px" }}
+            >
+              <a
+                href={`/${item.url}`}
+                style={{ textDecoration: "none", color: "black" }}
+              >
                 {item.icon} {item.name}
-              </MenuItem>
-              {item.divider}
-            </Link>
+              </a>
+              {item?.divider}
+            </Box>
           );
         })}
       </Menu>

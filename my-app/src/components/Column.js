@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
-import { Button } from "@mui/material";
+import { Button, Pagination } from "@mui/material";
 import Post from "./Post";
 
 const Column = (props) => {
@@ -31,6 +31,24 @@ const Column = (props) => {
     else {
       return setFilteredArray(props.column);
     }
+  };
+
+  useEffect(() => {
+    onFilter(list);
+  }, [props.column]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const ITEMS_PER_PAGE = 3;
+
+  useEffect(() => {
+    setTotalPages(Math.ceil(props.column.length / ITEMS_PER_PAGE));
+  }, [props.column.length]);
+
+  const getPostsForCurrentPage = () => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredArray.slice(startIndex, endIndex);
   };
 
   return (
@@ -125,29 +143,46 @@ const Column = (props) => {
         )}
       </div>
 
-      {filteredArray.map((item) => {
-        return (
-          <div
-            key={uuid()}
-            style={{
-              maxHeight: "300px",
-              overflow: "scroll",
-              border: "2px white solid",
-              textAlign: "center",
-              paddingRight: "10px",
-            }}
-          >
-            <Post
-              item={item}
-              onDelete={props.onDelete}
-              listname={props.listname}
-              column={props.column}
-              sortComments={props.sortComments}
-              setUpdateList={props.setUpdateList}
-            />
-          </div>
-        );
-      })}
+      {!!props.column.length && (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <Pagination
+            color="primary"
+            count={totalPages}
+            page={currentPage}
+            onChange={(event, value) => setCurrentPage(value)}
+          />
+        </div>
+      )}
+      {getPostsForCurrentPage().map((item) => (
+        <div
+          key={uuid()}
+          style={{
+            border: "2px white solid",
+            textAlign: "center",
+            paddingRight: "10px",
+          }}
+        >
+          <Post
+            item={item}
+            onDelete={props.onDelete}
+            listname={props.listname}
+            column={props.column}
+            sortComments={props.sortComments}
+            setUpdateList={props.setUpdateList}
+          />
+        </div>
+      ))}
+
+      {!!props.column.length && (
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <Pagination
+            color="primary"
+            count={totalPages}
+            page={currentPage}
+            onChange={(event, value) => setCurrentPage(value)}
+          />
+        </div>
+      )}
     </div>
   );
 };

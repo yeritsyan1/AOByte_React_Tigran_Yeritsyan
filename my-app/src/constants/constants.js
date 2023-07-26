@@ -1,6 +1,5 @@
 import Avatar from "@mui/material/Avatar";
 import PostAddIcon from "@mui/icons-material/PostAdd";
-import Logout from "@mui/icons-material/Logout";
 import Divider from "@mui/material/Divider";
 import {
   createUserWithEmailAndPassword,
@@ -21,7 +20,7 @@ export const signUp = (
       setUsername("");
       setEmail("");
       setPassword("");
-      navigate(SIGNIN);
+      navigate(`/${SIGNIN}`);
     })
     .catch((error) => {
       const errorCode = error.code;
@@ -47,22 +46,32 @@ export const signIn = (
     .catch(() => {});
 };
 
+export const signOut = (auth, navigate) => {
+  signOut(auth)
+    .then(() => {
+      localStorage.removeItem(USER);
+    })
+    .then(() => navigate(`/${SIGNIN}`))
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
 export const USER = "user";
 export const SIGNUP = "signup";
 export const SIGNIN = "signin";
 export const CREATEPOST = "createpost";
 export const PROFILE = "profile";
 export const list = [
-  { name: "Profile", icon: <Avatar />, url: PROFILE },
+  {
+    name: "Profile",
+    icon: <Avatar />,
+    url: PROFILE,
+  },
   {
     name: "Create post",
     icon: <PostAddIcon />,
     url: CREATEPOST,
     divider: <Divider />,
-  },
-  {
-    name: "Logout",
-    icon: <Logout fontSize="small" />,
-    url: SIGNIN,
   },
 ];

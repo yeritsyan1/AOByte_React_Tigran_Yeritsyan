@@ -7,7 +7,6 @@ import CreatePost from "./components/CreatePost";
 import Profile from "./components/Profile";
 import ProtectRoute from "./components/ProtectRoute";
 import ProtectLogin from "./components/registration/ProtectLogin";
-import AccountMenu from "./components/AccountNavigation";
 import { CREATEPOST, PROFILE, SIGNIN, SIGNUP } from "./constants/constants";
 import PageNotFound from "./components/ PageNotFound";
 
@@ -56,10 +55,8 @@ const App = () => {
               </ProtectRoute>
             }
           ></Route>
-          <Route path="*" element={<PageNotFound />}>
-          </Route>
+          <Route path="*" element={<PageNotFound />}></Route>
         </Routes>
-        {/* <AccountMenu /> */}
       </BrowserRouter>
     </>
   );

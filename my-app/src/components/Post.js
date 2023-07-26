@@ -25,6 +25,7 @@ import { USER } from "../constants/constants";
 const Post = (props) => {
   const [comment, setComment] = useState("");
   const db = getFirestore(app);
+  const [showAll, setShowAll] = useState(false);
 
   const rateComment = async (elem) => {
     await setDoc(doc(db, "posts", props.item.id), {
@@ -80,7 +81,20 @@ const Post = (props) => {
           </button>
         </CardActions>
         <Typography variant="body2" color="text.secondary">
-          {props.item.body}
+          {props.item.body.length > 200 ? (
+            <>
+              {props.item.body.slice(0, showAll ? props.item.body.length : 200)}
+              <Button
+                onClick={() => {
+                  setShowAll(!showAll);
+                }}
+              >
+                {showAll ? "...less" : "...more"}{" "}
+              </Button>
+            </>
+          ) : (
+            props.item.body
+          )}
         </Typography>
       </CardContent>
       <CardContent>
