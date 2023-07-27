@@ -3,7 +3,7 @@ import TextField from "@mui/material/TextField";
 import { Button } from "@mui/material";
 import { SIGNIN, signUp } from "../../constants/constants";
 import { getAuth } from "firebase/auth";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -70,7 +70,7 @@ const SignUp = () => {
         </Button>
       </DialogActions>
       <DialogActions>
-        <Link to={`/${SIGNIN}`}> Sign In </Link>
+        <a href={`/${SIGNIN}`}> Sign In </a>
       </DialogActions>
     </Dialog>
   );

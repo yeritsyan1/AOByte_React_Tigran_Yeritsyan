@@ -3,7 +3,7 @@ import TextField from "@mui/material/TextField";
 import { Button } from "@mui/material";
 import { SIGNUP, USER, signIn } from "../../constants/constants";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -23,9 +23,7 @@ const SignIn = () => {
         textAlign: "center",
       }}
     >
-      <DialogTitle>
-        <h1> Sign In </h1>
-      </DialogTitle>
+      <DialogTitle>Sign In</DialogTitle>
       <DialogContent>
         <TextField
           variant="outlined"
@@ -67,7 +65,7 @@ const SignIn = () => {
         </Button>
       </DialogActions>
       <DialogActions>
-        <Link to={`/${SIGNUP}`}> Sign Up </Link>
+        <a href={`/${SIGNUP}`}> Sign Up </a>
       </DialogActions>
     </Dialog>
   );

@@ -33,7 +33,6 @@ const List = () => {
         const data = doc.data();
         data.id = doc.id;
         data.isSelected = false;
-        data.averageRate = Math.random() * 100;
         return data;
       });
       await setPosts(docs);

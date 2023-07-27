@@ -97,6 +97,20 @@ const Post = (props) => {
           )}
         </Typography>
       </CardContent>
+      <CardActions> 
+        <Button variant="outlined"
+          disabled={props.item?.liked.includes(
+            JSON.parse(localStorage.getItem(USER)).providerData[0].email
+          )}
+         onClick={async () => {
+          const like = doc(db, "posts", props.item.id);
+          await updateDoc(like, {
+            averageRate: props.item.averageRate + 1,
+            liked: arrayUnion(JSON.parse(localStorage.getItem(USER))
+              .providerData[0].email)
+          });
+        }}> Like </Button>
+      </CardActions>
       <CardContent>
         <TextField
           placeholder="Comment"

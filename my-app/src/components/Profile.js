@@ -1,20 +1,30 @@
 import React from "react";
-import { getAuth } from "firebase/auth";
+import { getAuth, signOut } from "firebase/auth";
 import { Button } from "@mui/material";
-import { signOut } from "../constants/constants";
+import { SIGNIN, USER /* signOut */ } from "../constants/constants";
 import { useNavigate } from "react-router-dom";
 import AccountMenu from "./AccountNavigation";
 
 const Profile = () => {
   const auth = getAuth();
   const navigate = useNavigate();
+  const logOut = () => {
+    signOut(auth)
+      .then(() => {
+        localStorage.removeItem(USER);
+      })
+      .then(() => navigate(`/${SIGNIN}`))
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <div>
       <AccountMenu />
       <Button
         onClick={() => {
-          signOut(auth, navigate);
+          return logOut(auth, navigate);
         }}
       >
         Log Out
