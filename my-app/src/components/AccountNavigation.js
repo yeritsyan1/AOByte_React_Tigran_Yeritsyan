@@ -6,7 +6,7 @@ import Menu from "@mui/material/Menu";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import { v4 as uuid } from "uuid";
-import { list } from "../constants/constants";
+import { USER, list } from "../constants/constants";
 
 export default function AccountMenu() {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -31,7 +31,11 @@ export default function AccountMenu() {
             aria-haspopup="true"
             aria-expanded={open ? "true" : undefined}
           >
-            <Avatar sx={{ width: 32, height: 32 }}>M</Avatar>
+            <Avatar sx={{ width: 32, height: 32 }}>
+              {JSON.parse(
+                localStorage.getItem(USER)
+              ).providerData[0].email[0].toUpperCase()}
+            </Avatar>
           </IconButton>
         </Tooltip>
       </Box>
