@@ -8,15 +8,35 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import AccountMenu from "./AccountNavigation";
 import CustomTabPanel, { a11yProps } from "./CustomTabPanel";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  ADDTOCOLUMN,
+  DELETEME,
+  GETALLPOSTS,
+  ISSELECTEDFALSE,
+  ISSELECTEDTRUE,
+  ONREMOVE,
+  RATECOMMENT,
+  REMOVEITEM,
+  SORTAVERAGERATE,
+  SORTCOMMENTS,
+} from "../redux/action";
 
 const List = () => {
-  const [firstList, setFirstList] = useState([]);
-  const [secondList, setSecondList] = useState([]);
+  const firstList = useSelector(function (state) {
+    return state.firstList;
+  });
+  const secondList = useSelector(function (state) {
+    return state.secondList;
+  });
+  const posts = useSelector(function (state) {
+    return state.posts;
+  });
   const [isSorted, setIsSorted] = useState({
     firstList: false,
     secondList: false,
   });
-  const [posts, setPosts] = useState([]);
+  const dispatch = useDispatch();
   const [loaded, setLoaded] = useState(true);
   const db = getFirestore(app);
   const [value, setValue] = useState(0);
@@ -35,22 +55,33 @@ const List = () => {
         data.isSelected = false;
         return data;
       });
-      await setPosts(docs);
-    })().then(() => setLoaded(false));
-
-    setPosts(() => {
-      return posts?.map((item) => {
-        return (
-          (item.averageRate = item.comments.reduce(function (aggr, val) {
-            return aggr + val.rate;
-          }, 0)),
-          item
-        );
+      dispatch({
+        type: GETALLPOSTS,
+        payload: {
+          posts: docs,
+        },
       });
+      return docs;
+    })().then((res) => {
+      !!res.length && setLoaded(false);
+    });
+
+    dispatch({
+      type: RATECOMMENT,
+      payload: {
+        posts: posts?.map((item) => {
+          return (
+            (item.averageRate = item.comments.reduce(function (aggr, val) {
+              return aggr + val.rate;
+            }, 0)),
+            item
+          );
+        }),
+      },
     });
   }, []);
 
-  const addItem = (listname, setList) => {
+  const addItem = (list, listName) => {
     const newItem = posts?.reduce((aggr, val) => {
       return val.isSelected
         ? aggr
@@ -64,106 +95,133 @@ const List = () => {
       firstList.some((obj) => obj.id === newItem.id) ||
       secondList.some((obj) => obj.id === newItem.id);
     if (!itemExist) {
-      setList(() => {
-        return isSorted[listname]
-          ? [newItem, ...listname]
-          : [...listname, newItem];
+      dispatch({
+        type: ADDTOCOLUMN,
+        payload: {
+          [listName]: isSorted[list] ? [newItem, ...list] : [...list, newItem],
+          listName: listName,
+        },
       });
     }
 
     // change isSelected value
-    setPosts(() => {
-      return posts.map((item) => {
-        if (item.id === newItem.id) {
-          return {
-            ...item,
-            isSelected: true,
-          };
-        } else {
-          return item;
-        }
-      });
+    dispatch({
+      type: ISSELECTEDTRUE,
+      payload: {
+        posts: posts.map((item) => {
+          if (item.id === newItem.id) {
+            return {
+              ...item,
+              isSelected: true,
+            };
+          } else {
+            return item;
+          }
+        }),
+      },
     });
   };
 
   // sorted by value
-  const sortList = (listname, setList) => {
+  const sortList = (list, listName) => {
     setIsSorted({
       ...isSorted,
-      [listname]: !isSorted[listname],
+      [listName]: !isSorted[listName],
     });
-    setList(() => {
-      return listname.sort((a, b) =>
-        isSorted[listname]
-          ? b.averageRate - a.averageRate
-          : a.averageRate - b.averageRate
-      );
+
+    dispatch({
+      type: SORTAVERAGERATE,
+      payload: {
+        [listName]: list.sort((a, b) =>
+          isSorted[listName]
+            ? b.averageRate - a.averageRate
+            : a.averageRate - b.averageRate
+        ),
+        listName: listName,
+      },
     });
   };
 
   // delete me
-  const onDelete = (listname, setList, item) => {
-    setList(() => {
-      return listname.filter((elem) => elem.id !== item.id);
-    });
-
-    setPosts(() => {
-      return posts.map((elem) => {
-        if (elem.id === item.id) {
-          return {
-            ...item,
-            isSelected: false,
-          };
-        } else {
-          return elem;
-        }
-      });
-    });
-  };
-  // remove item
-  const onRemove = (listname, setList) => {
-    if (listname.length) {
-      let deletedObj = { averageRate: 0 };
-      for (const item in listname) {
-        deletedObj =
-          listname[item].averageRate > deletedObj.averageRate
-            ? listname[item]
-            : deletedObj;
-      }
-
-      return (
-        setList(() => {
-          return listname.filter((obj) => obj !== deletedObj);
-        }),
-        /* () => {
-          return sortList(listname), sortList(listname);
-        } */
-        setPosts(() => {
-          return posts.map((item) => {
-            if (item.id === deletedObj.id) {
+  const onDelete = (list, listName, item) => {
+    return (
+      dispatch({
+        type: DELETEME,
+        payload: {
+          [listName]: list.filter((elem) => elem.id !== item.id),
+          listName: listName,
+        },
+      }),
+      dispatch({
+        type: ISSELECTEDFALSE,
+        payload: {
+          posts: posts.map((elem) => {
+            if (elem.id === item.id) {
               return {
                 ...item,
                 isSelected: false,
               };
             } else {
-              return item;
+              return elem;
             }
-          });
+          }),
+        },
+      })
+    );
+  };
+
+  // remove item
+  const onRemove = (list, listName) => {
+    if (list.length) {
+      let deletedObj = { averageRate: 0 };
+      for (const item in list) {
+        deletedObj =
+          list[item].averageRate > deletedObj.averageRate
+            ? list[item]
+            : deletedObj;
+      }
+
+      return (
+        dispatch({
+          type: REMOVEITEM,
+          payload: {
+            [listName]: list.filter((obj) => obj !== deletedObj),
+            listName: listName,
+          },
+        }),
+        dispatch({
+          type: ONREMOVE,
+          payload: {
+            posts: posts.map((item) => {
+              if (item.id === deletedObj.id) {
+                return {
+                  ...item,
+                  isSelected: false,
+                };
+              } else {
+                return item;
+              }
+            }),
+          },
         })
       );
     }
   };
 
-  const sortComments = (listname, setList, elem) => {
-    setList(() => {
-      return listname.map((item) => {
-        if (item.id === elem.id) {
-          const sorted = elem?.comments?.sort((a, b) => b.rate - a.rate);
-          return { ...elem, sorted };
-        } else {
-          return item;
-        }
-      });
+  const sortComments = (list, listName, elem) => {
+    return dispatch({
+      type: SORTCOMMENTS,
+      payload: {
+        [listName]: list.map((item) => {
+          if (item.id === elem.id) {
+            const sorted = elem?.comments?.sort((a, b) => b.rate - a.rate);
+            return { ...elem, sorted };
+          } else {
+            return item;
+          }
+        }),
+        listName: listName,
+      },
     });
   };
 
@@ -179,12 +237,10 @@ const List = () => {
       <CustomTabPanel value={value} index={0}>
         <Column
           addItem={addItem}
-          column={firstList}
           sortList={sortList}
           onDelete={onDelete}
           onRemove={onRemove}
           listname="firstList"
-          setUpdateList={setFirstList}
           loaded={loaded}
           sortComments={sortComments}
         />
@@ -192,13 +248,10 @@ const List = () => {
       <CustomTabPanel value={value} index={1}>
         <Column
           addItem={addItem}
-          column={secondList}
           sortList={sortList}
           onDelete={onDelete}
           onRemove={onRemove}
-          // listname="secondList"
           listname="secondList"
-          setUpdateList={setSecondList}
           loaded={loaded}
           sortComments={sortComments}
         />
