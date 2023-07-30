@@ -2,48 +2,65 @@ import React, { useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { Button, Pagination } from "@mui/material";
 import Post from "./Post";
+import { useDispatch, useSelector } from "react-redux";
+import { FILTERCOMMENTS, FILTERPOSTS, SELECTALL } from "../redux/action";
 
 const Column = (props) => {
-  const [filteredArray, setFilteredArray] = useState(props.column);
+  const filteredArray = useSelector(function (state) {
+    return state.filteredArray;
+  });
   const [text, setText] = useState("");
   const [list, setList] = useState(props.listname);
+  const dispatch = useDispatch();
+  const column = useSelector(function (state) {
+    return state[props.listname];
+  });
 
   const onFilter = (filteredBy) => {
     // posts
     if (filteredBy === "posts") {
-      return setFilteredArray(() => {
-        return props.column.filter(
-          (post) => post.title.toLowerCase() === text.toLowerCase()
-        );
+      return dispatch({
+        type: FILTERPOSTS,
+        payload: {
+          filteredArray: column.filter(
+            (post) => post.title.toLowerCase() === text.toLowerCase()
+          ),
+        },
       });
     }
 
     // comments
     else if (filteredBy === "comments") {
-      return setFilteredArray(() => {
-        props.column.filter((item) =>
-          item.comments.some((elem) => elem.text.includes(text.toLowerCase()))
-        );
+      return dispatch({
+        type: FILTERCOMMENTS,
+        payload: {
+          filteredArray: column.filter((item) =>
+            item.comments.some((elem) => elem.text.includes(text.toLowerCase()))
+          ),
+        },
       });
     }
 
     // all posts
-    else {
-      return setFilteredArray(props.column);
-    }
+    return dispatch({
+      type: SELECTALL,
+      payload: {
+        filteredArray: column,
+      },
+    });
   };
 
   useEffect(() => {
     onFilter(list);
-  }, [props.column]);
+  }, [column]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 3;
 
   useEffect(() => {
-    setTotalPages(Math.ceil(props.column.length / ITEMS_PER_PAGE));
-  }, [props.column.length]);
+    setTotalPages(Math.ceil(column.length / ITEMS_PER_PAGE));
+  }, [column.length]);
 
   const getPostsForCurrentPage = () => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -110,7 +127,7 @@ const Column = (props) => {
       <div style={{ display: "flex", gap: "10px", paddingTop: "15px" }}>
         <Button
           variant="contained"
-          onClick={() => props.sortList(props.column, props.setUpdateList)}
+          onClick={() => props.sortList(column, props.listname)}
           style={{
             backgroundColor: "grey",
           }}
@@ -122,9 +139,7 @@ const Column = (props) => {
           variant="contained"
           color="success"
           onClick={() => {
-            list === props.listname &&
-              props.addItem(props.column, props.setUpdateList);
-            onFilter(list);
+            list === props.listname && props.addItem(column, props.listname);
           }}
         >
           Add
@@ -135,7 +150,7 @@ const Column = (props) => {
             variant="contained"
             color="error"
             onClick={() =>
-              props.onRemove(props.column, props.setUpdateList, onFilter(list))
+              props.onRemove(column, props.listname, onFilter(list))
             }
           >
             Remove
@@ -143,7 +158,7 @@ const Column = (props) => {
         )}
       </div>
 
-      {!!props.column.length && (
+      {!!column.length && (
         <div style={{ display: "flex", justifyContent: "center" }}>
           <Pagination
             color="primary"
@@ -166,14 +181,13 @@ const Column = (props) => {
             item={item}
             onDelete={props.onDelete}
             listname={props.listname}
-            column={props.column}
+            column={column}
             sortComments={props.sortComments}
-            setUpdateList={props.setUpdateList}
           />
         </div>
       ))}
 
-      {!!props.column.length && (
+      {!!column.length && (
         <div style={{ display: "flex", justifyContent: "center" }}>
           <Pagination
             color="primary"

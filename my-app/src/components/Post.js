@@ -74,7 +74,7 @@ const Post = (props) => {
               color: "white",
             }}
             onClick={() =>
-              props.onDelete(props.column, props.setUpdateList, props.item)
+              props.onDelete(props.column, props.listname, props.item)
             }
           >
             Delete
@@ -154,7 +154,7 @@ const Post = (props) => {
               onClick={() => {
                 props.sortComments(
                   props.column,
-                  props.setUpdateList,
+                  props.listname,
                   props.item
                 );
               }}
