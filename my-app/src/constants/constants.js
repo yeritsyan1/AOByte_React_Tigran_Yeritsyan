@@ -1,4 +1,4 @@
-import Avatar from "@mui/material/Avatar";
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import PostAddIcon from "@mui/icons-material/PostAdd";
 import Divider from "@mui/material/Divider";
 import {
@@ -13,7 +13,8 @@ export const signUp = (
   setUsername,
   setEmail,
   setPassword,
-  navigate
+  navigate,
+  setError
 ) => {
   return createUserWithEmailAndPassword(auth, email, password)
     .then(() => {
@@ -22,10 +23,8 @@ export const signUp = (
       setPassword("");
       navigate(`/${SIGNIN}`);
     })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log(errorCode, errorMessage);
+    .catch(() => {
+      setError("Wrong email or password.")
     });
 };
 
@@ -35,7 +34,8 @@ export const signIn = (
   password,
   setEmail,
   setPassword,
-  navigate
+  navigate,
+  setError
 ) => {
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
@@ -43,7 +43,9 @@ export const signIn = (
       setPassword("");
       navigate("/");
     })
-    .catch(() => {});
+    .catch(() => {
+      setError("Wrong email or password.")
+    });
 };
 
 export const signOut = (auth, navigate) => {
@@ -65,7 +67,7 @@ export const PROFILE = "profile";
 export const list = [
   {
     name: "Profile",
-    icon: <Avatar />,
+    icon: <AccountCircleOutlinedIcon />,
     url: PROFILE,
   },
   {

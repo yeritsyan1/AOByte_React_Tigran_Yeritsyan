@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
-import { Button } from "@mui/material";
+import { Button, DialogContentText } from "@mui/material";
 import { SIGNIN, signUp } from "../../constants/constants";
 import { getAuth } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -14,15 +14,18 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [error, setError] = useState('')
   const auth = getAuth();
   const navigate = useNavigate();
 
   return (
     <Dialog open={true} fullWidth sx={{ textAlign: "center" }}>
       <DialogTitle>Sign Up</DialogTitle>
+     {error && <DialogContentText color='error'> {error} </DialogContentText> }
       <DialogContent>
         <TextField
           placeholder="Username"
+          required
           value={username}
           onChange={(e) => {
             setUsername(e.target.value);
@@ -31,10 +34,11 @@ const SignUp = () => {
       </DialogContent>
       <DialogContent>
         <TextField
-          placeholder="email"
+          placeholder="Email"
+          required
           value={email}
           onChange={(e) => {
-            setEmail(e.target.value);
+              setEmail(e.target.value.trim());
           }}
         />
       </DialogContent>
@@ -42,9 +46,10 @@ const SignUp = () => {
         <TextField
           placeholder="Password"
           type="password"
+          required
           value={password}
           onChange={(e) => {
-            setPassword(e.target.value);
+            setPassword(e.target.value.trim());
           }}
         />
       </DialogContent>
@@ -54,16 +59,17 @@ const SignUp = () => {
           disabled={
             email.length < 6 || password.length < 6 || username.length < 3
           }
-          onClick={async () => {
-            await signUp(
-              auth,
-              email,
-              password,
-              setUsername,
-              setEmail,
-              setPassword,
-              navigate
-            );
+          onClick={async (e) => {
+              await signUp(
+                auth,
+                email,
+                password,
+                setUsername,
+                setEmail,
+                setPassword,
+                navigate,
+                setError
+              );
           }}
         >
           Sign Up

@@ -83,14 +83,15 @@ const List = () => {
 
   const addItem = (list, listName) => {
     const newItem = posts?.reduce((aggr, val) => {
-      return val.isSelected
-        ? aggr
-        : val.averageRate > aggr.averageRate
-        ? val
-        : aggr;
-    }, posts[0]);
+      if(!val.isSelected && (val.averageRate > aggr.averageRate)) {
+          return val
+      }  else {
+        return aggr
+      }
+    }, {averageRate: -Infinity});
 
     // update column list
+    if(posts.includes(newItem)) {
     const itemExist =
       firstList.some((obj) => obj.id === newItem.id) ||
       secondList.some((obj) => obj.id === newItem.id);
@@ -102,6 +103,7 @@ const List = () => {
           listName: listName,
         },
       });
+    }
     }
 
     // change isSelected value
