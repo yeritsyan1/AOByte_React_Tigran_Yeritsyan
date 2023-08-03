@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
-import { Button } from "@mui/material";
+import { Button, DialogContentText } from "@mui/material";
 import { SIGNUP, USER, signIn } from "../../constants/constants";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +12,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("")
   const auth = getAuth();
   const navigate = useNavigate();
 
@@ -24,21 +25,24 @@ const SignIn = () => {
       }}
     >
       <DialogTitle>Sign In</DialogTitle>
+      {error && <DialogContentText color='error'> {error} </DialogContentText> }
       <DialogContent>
         <TextField
           variant="outlined"
-          placeholder="email"
+          placeholder="Email"
+          required
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value.trim())}
         />
       </DialogContent>
       <DialogContent>
         <TextField
           variant="outlined"
-          placeholder="password"
+          placeholder="Password"
           type="password"
+          required
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value.trim())}
         />
       </DialogContent>
       <DialogActions>
@@ -52,7 +56,8 @@ const SignIn = () => {
               password,
               setEmail,
               setPassword,
-              navigate
+              navigate,
+              setError
             );
             await onAuthStateChanged(auth, (user) => {
               if (user) {

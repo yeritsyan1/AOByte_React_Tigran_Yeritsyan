@@ -64,7 +64,7 @@ export default function AccountMenu() {
               display: "block",
               position: "absolute",
               top: 0,
-              right: 14,
+              left: 14,
               width: 10,
               height: 10,
               bgcolor: "background.paper",
@@ -80,7 +80,7 @@ export default function AccountMenu() {
           return (
             <Box
               key={uuid()}
-              sx={{ textAlign: "center", padding: "10px 20px" }}
+              sx={{ padding: "10px 20px" }}
             >
               <a
                 href={`/${item.url}`}

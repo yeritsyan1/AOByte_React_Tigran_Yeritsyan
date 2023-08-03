@@ -59,8 +59,8 @@ const Column = (props) => {
   const ITEMS_PER_PAGE = 3;
 
   useEffect(() => {
-    setTotalPages(Math.ceil(column.length / ITEMS_PER_PAGE));
-  }, [column.length]);
+    setTotalPages(Math.ceil(filteredArray.length / ITEMS_PER_PAGE));
+  }, [filteredArray.length]);
 
   const getPostsForCurrentPage = () => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
